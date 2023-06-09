@@ -1,0 +1,13 @@
+[tool.poetry]
+name = "RADICL_seq_reproducibility"
+version = "0.0.1"
+description = "Exploring ways to directly measure the uncertainty in the captured interactions in terms of their corresponding genomic footprint across replicates"
+authors = ["Vipin Kumar <princeps091@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+pathlib = "^1.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
