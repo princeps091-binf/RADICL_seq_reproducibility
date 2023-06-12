@@ -5,9 +5,14 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial import KDTree
 import networkx as nx
+import hvplot.pandas
 #%%
 replicate1_read_file = "./../data/raw/IPSC_replicate1_intra.bed"
-replicate2_read_file = "./../data/raw/IPSC_replicate2_intra.bed"
+#bio
+#replicate2_read_file = "./../data/raw/IPSC_replicate2_intra.bed"
+#tech
+replicate2_read_file = "./../data/raw/IPSC_replicate1_2_intra.bed"
+
 #%%
 def import_chr_reads(read_file,chromo):
     iter_csv = pd.read_csv(read_file, 
@@ -41,7 +46,7 @@ def drop_pcr_duplicates(read_tbl):
                         )
 
 #%%
-chromo = 'chr19'
+chromo = 'chr22'
 
 DNA_read_replicate1_tbl = import_chr_reads(replicate1_read_file,chromo)
 DNA_read_replicate2_tbl = import_chr_reads(replicate2_read_file,chromo)
@@ -74,7 +79,8 @@ rep1_idx = np.array(list(range(0,rep1_read_df.shape[0])))
 rep_idx_array = np.concatenate((rep1_idx,rep2_idx))
 rep_ID_array = np.array(["rep1"]*rep1_read_df.shape[0] + ["rep2"]*rep2_read_df.shape[0])
 alt_rep_array = ["rep2"]*rep1_read_df.shape[0] + ["rep1"]*rep2_read_df.shape[0]
-
+reff_read_dist = np.concatenate((np.abs(rep1_read_df.DNA_start.to_numpy() - rep1_read_df.RNA_start.to_numpy()),
+                  np.abs(rep2_read_df.DNA_start.to_numpy() - rep2_read_df.RNA_start.to_numpy())))
 nearest_neigh_idx = np.concatenate((kdB_2.query(rep1_read_df, k=1)[-1],kdB_1.query(rep2_read_df, k=1)[-1]))
 
 # each neighbour-pair ordered with rep1 side on the left/first
@@ -83,12 +89,21 @@ nearest_neihgbour_df =(pd.DataFrame({
         'ego':rep_ID_array,
         'ego_idx':rep_idx_array,
         'alter':alt_rep_array,
-        'alter_idx':nearest_neigh_idx
+        'alter_idx':nearest_neigh_idx,
+        'read_dist':reff_read_dist
 
 }))
 #%%
-(nearest_neihgbour_df
- .query("ego == 'rep1'")
+nearest_neihgbour_process_df = (nearest_neihgbour_df.assign(correct_ego = lambda df_:df_['ego'].where(df_['ego'] < df_['alter'],df_['alter']),
+        correct_ego_idx = lambda df_:df_['ego_idx'].where(df_['ego'] < df_['alter'],df_['alter_idx']),
+        correct_alter = lambda df_:df_['alter'].where(df_['ego'] < df_['alter'],df_['ego']),
+        correct_alter_idx = lambda df_:df_['alter_idx'].where(df_['ego'] < df_['alter'],df_['ego_idx']))
+.filter(regex=("^correct|dist"))
+)
+
+nearest_neihgbour_process_df.columns = nearest_neihgbour_process_df.columns.str.replace("correct_","")
+#%%
+nearest_neihgbour_distance_df = (nearest_neihgbour_process_df
  .assign(DNA_ego = lambda df_:rep1_read_df.DNA_start.iloc[df_.ego_idx].to_numpy(),
          DNA_alter = lambda df_:rep2_read_df.DNA_start.iloc[df_.alter_idx].to_numpy(),
          RNA_ego = lambda df_:rep1_read_df.RNA_start.iloc[df_.ego_idx].to_numpy(),
@@ -96,20 +111,26 @@ nearest_neihgbour_df =(pd.DataFrame({
          )
  .assign(DNA_dist = lambda df_:np.abs(df_.DNA_ego - df_.DNA_alter),
          RNA_dist = lambda df_:np.abs(df_.RNA_ego - df_.RNA_alter))
- .sort_values('RNA_dist')
- .DNA_dist.min()
+ .assign(lreff = lambda df_:np.log10(df_.read_dist),
+         lneigh_RNA = lambda df_:np.log10(df_.RNA_dist + 1),
+         lneigh_DNA = lambda df_:np.log10(df_.DNA_dist + 1))
 )
+#%%
+(nearest_neihgbour_distance_df
+ .hvplot(x='lreff',y='lneigh_RNA',kind = 'scatter', alpha=1,size = 0.1))
+#%%
+nearest_neihgbour_distance_df.hvplot.kde('lneigh_RNA')
+
+
+
+
+
+
+
 
 #%%
-nearest_neihgbour_process_df = (nearest_neihgbour_df.assign(correct_ego = lambda df_:df_['ego'].where(df_['ego'] < df_['alter'],df_['alter']),
-        correct_ego_idx = lambda df_:df_['ego_idx'].where(df_['ego'] < df_['alter'],df_['alter_idx']),
-        correct_alter = lambda df_:df_['alter'].where(df_['ego'] < df_['alter'],df_['ego']),
-        correct_alter_idx = lambda df_:df_['alter_idx'].where(df_['ego'] < df_['alter'],df_['ego_idx']))
-.filter(regex=("^correct"))
-)
-
-nearest_neihgbour_process_df.columns = nearest_neihgbour_process_df.columns.str.replace("correct_","")
 # then remove duplicates to produce undirected graph!
+
 nearest_neihgbour_process_df = nearest_neihgbour_process_df.drop_duplicates().reset_index(drop=True)
 #%%
 # detect connected components
