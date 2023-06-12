@@ -55,12 +55,12 @@ dedup_radicl_rep2_df = drop_pcr_duplicates(DNA_read_replicate2_tbl)
 rep1_read_df = (dedup_radicl_rep1_df
                 .query("RNA_strand == '+'")
                 .loc[:,['RNA_start','DNA_start']]
-                .reset_index()
+                .reset_index(drop=True)
                 )
 rep2_read_df = (dedup_radicl_rep2_df
                 .query("RNA_strand == '+'")
                 .loc[:,['RNA_start','DNA_start']]
-                .reset_index()
+                .reset_index(drop=True)
                 )
 kdB_1 = KDTree(rep1_read_df)
 kdB_2 = KDTree(rep2_read_df)
@@ -85,23 +85,38 @@ nearest_neihgbour_df =(pd.DataFrame({
         'alter':alt_rep_array,
         'alter_idx':nearest_neigh_idx
 
-})
-.assign(correct_ego = lambda df_:df_['ego'].where(df_['ego'] < df_['alter'],df_['alter']),
+}))
+#%%
+(nearest_neihgbour_df
+ .query("ego == 'rep1'")
+ .assign(DNA_ego = lambda df_:rep1_read_df.DNA_start.iloc[df_.ego_idx].to_numpy(),
+         DNA_alter = lambda df_:rep2_read_df.DNA_start.iloc[df_.alter_idx].to_numpy(),
+         RNA_ego = lambda df_:rep1_read_df.RNA_start.iloc[df_.ego_idx].to_numpy(),
+         RNA_alter = lambda df_:rep2_read_df.RNA_start.iloc[df_.alter_idx].to_numpy()
+         )
+ .assign(DNA_dist = lambda df_:np.abs(df_.DNA_ego - df_.DNA_alter),
+         RNA_dist = lambda df_:np.abs(df_.RNA_ego - df_.RNA_alter))
+ .sort_values('RNA_dist')
+ .DNA_dist.min()
+)
+
+#%%
+nearest_neihgbour_process_df = (nearest_neihgbour_df.assign(correct_ego = lambda df_:df_['ego'].where(df_['ego'] < df_['alter'],df_['alter']),
         correct_ego_idx = lambda df_:df_['ego_idx'].where(df_['ego'] < df_['alter'],df_['alter_idx']),
         correct_alter = lambda df_:df_['alter'].where(df_['ego'] < df_['alter'],df_['ego']),
         correct_alter_idx = lambda df_:df_['alter_idx'].where(df_['ego'] < df_['alter'],df_['ego_idx']))
 .filter(regex=("^correct"))
 )
 
-nearest_neihgbour_df.columns = nearest_neihgbour_df.columns.str.replace("correct_","")
+nearest_neihgbour_process_df.columns = nearest_neihgbour_process_df.columns.str.replace("correct_","")
 # then remove duplicates to produce undirected graph!
-nearest_neihgbour_df = nearest_neihgbour_df.drop_duplicates().reset_index(drop=True)
+nearest_neihgbour_process_df = nearest_neihgbour_process_df.drop_duplicates().reset_index(drop=True)
 #%%
 # detect connected components
-nearest_neihgbour_df = (nearest_neihgbour_df
+nearest_neihgbour_process_df = (nearest_neihgbour_process_df
  .assign(ego_node = lambda df_:df_.ego+ "_" + df_.ego_idx.astype(str),
         alter_node = lambda df_: df_.alter+ "_" + df_.alter_idx.astype(str)))
-read_graph = nx.from_pandas_edgelist(nearest_neihgbour_df.loc[:,['ego_node','alter_node']],'ego_node','alter_node',create_using=nx.Graph())
+read_graph = nx.from_pandas_edgelist(nearest_neihgbour_process_df.loc[:,['ego_node','alter_node']],'ego_node','alter_node',create_using=nx.Graph())
 nx.number_connected_components(read_graph)
 nx.is_bipartite(read_graph)
 
