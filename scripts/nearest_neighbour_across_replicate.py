@@ -141,5 +141,5 @@ read_graph = nx.from_pandas_edgelist(nearest_neihgbour_process_df.loc[:,['ego_no
 nx.number_connected_components(read_graph)
 nx.is_bipartite(read_graph)
 
-# examine connected component properties (span, size) and compare with consitutive
+# examine connected component properties (span, size) and compare with consecutive
 # read properties like DNA-RNA distance, etc
