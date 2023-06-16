@@ -116,8 +116,13 @@ nearest_neihgbour_distance_df = (nearest_neihgbour_process_df
          lneigh_DNA = lambda df_:np.log10(df_.DNA_dist + 1))
 )
 #%%
-(nearest_neihgbour_distance_df
- .hvplot(x='lreff',y='lneigh_RNA',kind = 'scatter', alpha=1,size = 0.1))
+plot = (nearest_neihgbour_distance_df
+ .hvplot(x='lreff',y='lneigh_RNA',kind = 'scatter', alpha=1,size = 0.1,width=600, height=600,))
+
+plot
+
+hvplot.save(plot, 'test.html')
+
 #%%
 nearest_neihgbour_distance_df.hvplot.kde('lneigh_RNA')
 
