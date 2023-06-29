@@ -5,7 +5,7 @@ import numpy as np
 import os
 #%%
 # peak file
-peak_file = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/IPSC_replicate1/IPSC_replicate1_all_peak.bed"
+peak_file = "/home/vipink/Documents/FANTOM6/alternative_filter_blacklist_pipeline/workflow/data/results/DNA/IPSC_replicate1/IPSC_replicate1_all_peak.bed"
 
 # bdg folder
 bdg_folder = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/IPSC_replicate1/bdg/"

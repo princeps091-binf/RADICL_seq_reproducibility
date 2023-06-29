@@ -4,14 +4,14 @@ import pandas as pd
 import numpy as np
 import os
 #%%
-peak_file_a = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/IPSC_replicate1/IPSC_replicate1_all_peak.bed"
-peak_file_b = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/IPSC_replicate2/IPSC_replicate2_all_peak.bed"
+peak_file_a = "/home/vipink/Documents/FANTOM6/alternative_filter_blacklist_pipeline/workflow/data/results/DNA/Neuron_replicate1/Neuron_replicate1_all_peak.bed"
+peak_file_b = "/home/vipink/Documents/FANTOM6/alternative_filter_blacklist_pipeline/workflow/data/results/DNA/Neuron_replicate2/Neuron_replicate2_all_peak.bed"
 
-rep1_bdg_folder = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/IPSC_replicate1/bdg/"
-rep2_bdg_folder = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/IPSC_replicate2/bdg/"
+rep1_bdg_folder = "/home/vipink/Documents/FANTOM6/alternative_filter_blacklist_pipeline/workflow/data/results/DNA/Neuron_replicate1/bdg/"
+rep2_bdg_folder = "/home/vipink/Documents/FANTOM6/alternative_filter_blacklist_pipeline/workflow/data/results/DNA/Neuron_replicate2/bdg/"
 
-out_folder_rep1 = "/home/vipink/Documents/FANTOM6/RADICL_seq_reproducibility/data/processed/idr_data/IPSC_rep1/"
-out_folder_rep2 = "/home/vipink/Documents/FANTOM6/RADICL_seq_reproducibility/data/processed/idr_data/IPSC_rep2/"
+out_folder_rep1 = "/home/vipink/Documents/FANTOM6/RADICL_seq_reproducibility/data/processed/idr_data/Neuron_rep1/"
+out_folder_rep2 = "/home/vipink/Documents/FANTOM6/RADICL_seq_reproducibility/data/processed/idr_data/Neuron_rep2/"
 out_file = "union_peak.bed"
 
 #%%
@@ -75,6 +75,6 @@ chr_set = peak_df.chrom.drop_duplicates().tolist()
 
 #%%
 produce_peak_score_bed_file(peak_df,rep1_bdg_folder,chr_set,out_folder_rep1,out_file)
-produce_peak_score_bed_file(peak_df,rep1_bdg_folder,chr_set,out_folder_rep2,out_file)
+produce_peak_score_bed_file(peak_df,rep2_bdg_folder,chr_set,out_folder_rep2,out_file)
 
 # %%

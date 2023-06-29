@@ -5,13 +5,14 @@ import numpy as np
 import hvplot.pandas
 #%%
 peak_file_a = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/IPSC_replicate1/IPSC_replicate1_all_peak.bed"
-#peak_file_b = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/IPSC_replicate2/IPSC_replicate2_all_peak.bed"
-peak_file_b = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/Neuron_replicate1/Neuron_replicate1_all_peak.bed"
+peak_file_b = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/IPSC_replicate2/IPSC_replicate2_all_peak.bed"
+#peak_file_b = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/Neuron_replicate1/Neuron_replicate1_all_peak.bed"
 
 rep1_bdg_folder = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/IPSC_replicate1/bdg/"
-#rep2_bdg_folder = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/IPSC_replicate2/bdg/"
-rep2_bdg_folder = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/Neuron_replicate1/bdg/"
+rep2_bdg_folder = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/IPSC_replicate2/bdg/"
+#rep2_bdg_folder = "/home/vipink/Documents/FANTOM6/RADICL_hotspot/workflow/data/results/DNA/Neuron_replicate1/bdg/"
 
+idr_report_file = "/home/vipink/Documents/FANTOM6/RADICL_seq_reproducibility/data/processed/idr_data/idr_union_IPSC1_IPSC2.txt"
 #%%
 rep1_peak_df = (pd.read_csv(peak_file_a,header=None,delimiter="\t",dtype={
     0:str,
@@ -68,4 +69,9 @@ plot = (peak_bdg_df
  .hvplot(x='rank1',y='rank2',kind = 'scatter',logx = True,logy = True, alpha=1,size = 1,width=600, height=600,))
 
 plot
-# %%
+#%%
+
+plot = (peak_bdg_df
+ .hvplot(x='qvalue1',y='qvalue2',kind = 'scatter',logx = True,logy = True, alpha=1,size = 1,width=600, height=600,))
+
+plot
